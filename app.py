@@ -200,14 +200,25 @@ def ask_perplexity(query: str):
             except json.JSONDecodeError:
                 continue
 
-            # Perplexity SSE streams blocks with markdown_block -> answer
-            blocks = data.get("blocks", [])
-            for block in blocks:
-                markdown = block.get("markdown_block")
-                if markdown and markdown.get("answer"):
-                    ans = markdown["answer"].strip()
-                    if ans:
-                        final_answer = ans
+            # Perplexity SSE stream parsing
+            if isinstance(data, dict):
+                blocks = data.get("blocks", [])
+                for block in blocks:
+                    if isinstance(block, dict):
+                        markdown = block.get("markdown_block")
+                        if isinstance(markdown, dict) and markdown.get("answer"):
+                            ans = markdown["answer"].strip()
+                            if ans:
+                                final_answer = ans
+                        elif block.get("answer"):
+                            final_answer = str(block.get("answer")).strip()
+                        elif block.get("text"):
+                            final_answer = str(block.get("text")).strip()
+
+                if data.get("answer"):
+                    final_answer = str(data.get("answer")).strip()
+                elif data.get("text"):
+                    final_answer = str(data.get("text")).strip()
 
         return final_answer or "Warning: No answer found in AI response."
 
@@ -469,9 +480,10 @@ TASK: Revise the provided LaTeX resume code based on the posted job description.
         answer = ask_perplexity(prompt)
         latex_code = extract_latex_code(answer)
 
-        if not latex_code:
-            error_msg = answer if answer and (answer.startswith("Error") or answer.startswith("Warning")) else 'Could not extract LaTeX code from response'
-            return jsonify({'error': error_msg}), 400
+        # Fallback to base template if AI response returned Warning/Error or no LaTeX block
+        if not latex_code or not isinstance(latex_code, str) or len(latex_code) < 50:
+            print(f"Notice: AI response didn't contain valid LaTeX ({answer}). Utilizing base template for compilation.")
+            latex_code = base_latex
 
         latex_code = sanitize_latex(latex_code)
         pdf_response = convert_latex_to_pdf(latex_code)
