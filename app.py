@@ -226,6 +226,60 @@ def ask_perplexity(query: str):
         return f"Error occurred: {str(e)}"
 
 
+def intelligent_ats_tailor(latex_template: str, job_description: str) -> str:
+    if not job_description:
+        return latex_template
+
+    known_skills = [
+        'Python', 'Java', 'C++', 'C#', 'JavaScript', 'TypeScript', 'HTML5', 'CSS3', 'SQL',
+        'Salesforce', 'Apex', 'Lightning Web Components', 'LWC', 'SOQL', 'Visualforce',
+        'React', 'Node.js', 'Flask', 'Django', 'Express', 'Angular', 'Vue.js',
+        'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'REST APIs', 'GraphQL', 'Git',
+        'PostgreSQL', 'MongoDB', 'Redis', 'MySQL', 'CI/CD', 'Microservices', 'Agile'
+    ]
+
+    found_skills = []
+    for skill in known_skills:
+        if re.search(r'\b' + re.escape(skill) + r'\b', job_description, re.IGNORECASE):
+            found_skills.append(skill)
+
+    if not found_skills:
+        words = re.findall(r'\b[A-Z][a-zA-Z0-9\+\#]{2,}\b', job_description)
+        found_skills = list(dict.fromkeys(words))[:10]
+
+    langs = [s for s in found_skills if s in ['Python', 'JavaScript', 'TypeScript', 'Java', 'C++', 'C#', 'HTML5', 'CSS3', 'SQL', 'Apex']]
+    frameworks = [s for s in found_skills if s in ['Salesforce', 'React', 'Node.js', 'Flask', 'Django', 'Lightning Web Components', 'LWC', 'Git', 'Docker', 'REST APIs', 'GraphQL', 'Express', 'Angular', 'Vue.js', 'CI/CD']]
+    cloud_db = [s for s in found_skills if s not in langs and s not in frameworks]
+
+    if not langs: langs = ['Python', 'JavaScript', 'HTML5', 'CSS3', 'SQL']
+    if not frameworks: frameworks = ['Flask', 'React', 'Node.js', 'Git', 'REST APIs']
+    if not cloud_db: cloud_db = ['PostgreSQL', 'AWS', 'Docker', 'Salesforce Platform']
+
+    def clean_latex(text_list):
+        cleaned = []
+        for item in text_list:
+            item = item.replace('&', '\\&').replace('_', '\\_').replace('%', '\\%')
+            cleaned.append(item)
+        return ', '.join(cleaned)
+
+    new_skills_block = f"""\\begin{{itemize}}
+    \\item \\textbf{{Languages:}} {clean_latex(langs)}
+    \\item \\textbf{{Frameworks \\& Tools:}} {clean_latex(frameworks)}
+    \\item \\textbf{{Database \\& Cloud:}} {clean_latex(cloud_db)}
+\\end{{itemize}}"""
+
+    if r'\section*{Technical Skills}' in latex_template:
+        parts = latex_template.split(r'\section*{Technical Skills}')
+        header = parts[0] + r'\section*{Technical Skills}' + '\n\\hrule \\vspace{4pt}\n'
+        rest = parts[1]
+        end_idx = rest.find(r'\end{itemize}')
+        if end_idx != -1:
+            after_skills = rest[end_idx + len(r'\end{itemize}'):]
+            return header + new_skills_block + after_skills
+
+    return latex_template
+
+
 def sanitize_latex(latex: str) -> str:
     if not latex:
         return latex
@@ -480,10 +534,10 @@ TASK: Revise the provided LaTeX resume code based on the posted job description.
         answer = ask_perplexity(prompt)
         latex_code = extract_latex_code(answer)
 
-        # Fallback to base template if AI response returned Warning/Error or no LaTeX block
+        # Fallback to intelligent ATS keyword tailoring if AI response was rate-limited or missing
         if not latex_code or not isinstance(latex_code, str) or len(latex_code) < 50:
-            print(f"Notice: AI response didn't contain valid LaTeX ({answer}). Utilizing base template for compilation.")
-            latex_code = base_latex
+            print(f"Notice: AI response didn't contain full LaTeX ({answer}). Applying intelligent ATS keyword tailoring...")
+            latex_code = intelligent_ats_tailor(base_latex, job_description)
 
         latex_code = sanitize_latex(latex_code)
         pdf_response = convert_latex_to_pdf(latex_code)
