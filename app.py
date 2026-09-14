@@ -1,5 +1,10 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory, Response
-from curl_cffi import requests
+try:
+    from curl_cffi import requests as curl_requests
+    HAS_CURL_CFFI = True
+except Exception as e:
+    import requests as curl_requests
+    HAS_CURL_CFFI = False
 import json
 import sys
 import re
@@ -21,10 +26,18 @@ if sys.platform.startswith('win'):
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
 
-UPLOAD_FOLDER = 'generated_resumes'
+# Vercel serverless / Read-only filesystem fallback to /tmp
+if os.environ.get('VERCEL') or not os.access('.', os.W_OK):
+    UPLOAD_FOLDER = os.path.join('/tmp', 'generated_resumes')
+else:
+    UPLOAD_FOLDER = 'generated_resumes'
+
 CLEANUP_INTERVAL = 3600  # seconds
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+try:
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+except Exception:
+    pass
 
 # Simple in-memory metadata for generated files
 file_metadata = {}
@@ -159,12 +172,17 @@ def ask_perplexity(query: str):
     }
 
     try:
-        response = requests.post(
+        post_kwargs = {
+            'headers': headers,
+            'data': json.dumps(payload, ensure_ascii=False).encode('utf-8'),
+            'timeout': 120,
+        }
+        if HAS_CURL_CFFI:
+            post_kwargs['impersonate'] = "chrome110"
+
+        response = curl_requests.post(
             url,
-            headers=headers,
-            data=json.dumps(payload, ensure_ascii=False).encode('utf-8'),
-            impersonate="chrome110",
-            timeout=120_000,
+            **post_kwargs
         )
         response.encoding = 'utf-8'
 
@@ -483,7 +501,6 @@ TASK: Revise the provided LaTeX resume code based on the posted job description.
 
 
 if __name__ == '__main__':
-    start_cleanup_scheduler()
     print("🚀 ResumeStudio starting (Modular Pages with Templates & LocalStorage)…")
     print("📁 Generated files stored in:", UPLOAD_FOLDER)
     print("🗑️ Automatic cleanup enabled (files deleted after 1 hour)")
