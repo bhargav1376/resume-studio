@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}ResumeStudio — Saved Resumes{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <div class="section-title">Saved Generated Resumes</div>
+    <p class="small" style="margin-bottom: 14px;">Resumes generated during your session are stored here locally in your browser.</p>
+    <div id="savedResumesList" class="card-list"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function refreshSavedResumesUI() {
+        const resumes = getSavedResumes();
+        const container = $('#savedResumesList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (resumes.length === 0) {
+            container.innerHTML = '<div class="small muted" style="padding: 10px;">No saved resumes found yet. Generate a resume in the Home page to see it here!</div>';
+            return;
+        }
+
+        resumes.forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'card-item';
+            item.innerHTML = `
+                <div class="card-info" style="max-width: 55%;">
+                    <div class="card-title">${r.title || 'Generated Resume'}</div>
+                    <div class="card-sub">Generated on: ${new Date(r.createdAt).toLocaleString()}</div>
+                </div>
+                <div class="row" style="gap: 8px;">
+                    ${r.latex_code ? `
+                    <button class="secondary" style="font-size: 13px;" onclick="copySavedLatex(event, '${r.id}')">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span>Copy Code</span>
+                    </button>` : ''}
+                    ${r.download_url ? `
+                    <a href="${r.download_url}" download class="btn secondary" style="font-weight:600; font-size: 13px;">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Download PDF</span>
+                    </a>` : ''}
+                    <button class="danger" style="font-size: 13px;" onclick="deleteSavedResume('${r.id}')">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Remove</span>
+                    </button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    window.copySavedLatex = async function(event, id) {
+        const resumes = getSavedResumes();
+        const found = resumes.find(r => r.id === id);
+        if (found && found.latex_code) {
+            try {
+                await navigator.clipboard.writeText(found.latex_code);
+                showGlobalToast('📋 Code Copied!', 'LaTeX code copied to clipboard.');
+            } catch (e) {}
+        }
+    };
+
+    window.deleteSavedResume = function(id) {
+        let resumes = getSavedResumes();
+        resumes = resumes.filter(r => r.id !== id);
+        saveSavedResumes(resumes);
+        refreshSavedResumesUI();
+        showGlobalToast('🗑️ Resume Removed', 'The resume has been deleted from local storage.');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        refreshSavedResumesUI();
+    });
+</script>
+{% endblock %}

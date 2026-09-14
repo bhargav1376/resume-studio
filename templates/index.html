@@ -1,0 +1,697 @@
+{% extends "base.html" %}
+
+{% block title %}ResumeStudio — Land Your Dream Job{% endblock %}
+
+{% block content %}
+<style>
+    /* Hero Header Section */
+    .hero-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 24px 16px 12px;
+        gap: 14px;
+    }
+
+    .greeting-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(124, 156, 255, 0.12);
+        border: 1px solid var(--border);
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .hero-logo-card {
+        width: 80px;
+        height: 80px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, var(--primary), #9e77ff);
+        display: grid;
+        place-items: center;
+        box-shadow: 0 12px 32px rgba(124, 156, 255, 0.35);
+        color: #ffffff;
+        margin: 4px 0;
+        animation: floatAnimation 4s ease-in-out infinite;
+    }
+
+    @keyframes floatAnimation {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(124, 156, 255, 0.08);
+        border: 1px solid var(--border);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .hero-title {
+        font-size: clamp(28px, 4vw, 38px);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(14px, 2vw, 16px);
+        color: var(--muted);
+        max-width: 600px;
+        line-height: 1.5;
+    }
+
+    .feature-pills {
+        display: flex;
+        gap: clamp(6px, 1.8vw, 12px);
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+    .feature-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: clamp(5px, 1.5vw, 8px);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: clamp(6px, 1.5vw, 9px) clamp(10px, 2.5vw, 18px);
+        border-radius: 30px;
+        font-size: clamp(11px, 2.2vw, 13.5px);
+        font-weight: 600;
+        color: var(--text);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        animation: continuousPillPulse 3s ease-in-out infinite;
+    }
+
+    @media (max-width: 640px) {
+        .feature-pills {
+            gap: 6px;
+        }
+
+        .feature-pill {
+            font-size: 11px;
+            padding: 5px 11px;
+        }
+
+        .feature-pill svg {
+            width: 13px;
+            height: 13px;
+        }
+    }
+
+    .feature-pill::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(124, 156, 255, 0.25), transparent);
+        animation: continuousShimmer 3s ease-in-out infinite;
+    }
+
+    .feature-pill svg {
+        color: var(--primary);
+        animation: continuousIconTilt 3s ease-in-out infinite;
+    }
+
+    /* Staggered animation delays for continuous rhythmic effect */
+    .feature-pill:nth-child(1),
+    .feature-pill:nth-child(1)::before,
+    .feature-pill:nth-child(1) svg {
+        animation-delay: 0s;
+    }
+
+    .feature-pill:nth-child(2),
+    .feature-pill:nth-child(2)::before,
+    .feature-pill:nth-child(2) svg {
+        animation-delay: 1s;
+    }
+
+    .feature-pill:nth-child(3),
+    .feature-pill:nth-child(3)::before,
+    .feature-pill:nth-child(3) svg {
+        animation-delay: 2s;
+    }
+
+    @keyframes continuousPillPulse {
+
+        0%,
+        100% {
+            transform: translateY(0);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            border-color: var(--border);
+        }
+
+        50% {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 22px rgba(124, 156, 255, 0.3);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+    }
+
+    @keyframes continuousShimmer {
+        0% {
+            left: -100%;
+        }
+
+        45%,
+        100% {
+            left: 100%;
+        }
+    }
+
+    @keyframes continuousIconTilt {
+
+        0%,
+        100% {
+            transform: rotate(0deg) scale(1);
+        }
+
+        50% {
+            transform: rotate(18deg) scale(1.2);
+        }
+    }
+
+    /* Pro Tip Card */
+    .pro-tip-card {
+        background: rgba(124, 156, 255, 0.06);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-top: 16px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+    }
+
+    .pro-tip-icon {
+        background: rgba(124, 156, 255, 0.15);
+        border-radius: 12px;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        display: grid;
+        place-items: center;
+        color: var(--primary);
+    }
+
+    /* Modal Step-by-Step Progress Bar */
+    .progress-track {
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        height: 10px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 14px 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--primary), var(--primary-2), #9e77ff);
+        transition: width 0.15s linear;
+    }
+
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        font-size: 13.5px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.pending {
+        opacity: 0.5;
+    }
+
+    .step-item.active {
+        border-color: var(--primary);
+        background: rgba(124, 156, 255, 0.1);
+        color: var(--text);
+    }
+
+    .step-item.completed {
+        border-color: var(--success);
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--success);
+    }
+
+    .step-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+    }
+
+    .step-item.active .step-icon {
+        background: var(--primary);
+        color: white;
+        border-color: transparent;
+    }
+
+    .step-item.completed .step-icon {
+        background: var(--success);
+        color: white;
+        border-color: transparent;
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="greeting-pill" id="greetingPill">
+        <span>👋</span>
+        <span id="greetingText">Good Evening</span>
+    </div>
+
+    <div class="hero-logo-card">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+    </div>
+
+    <div class="hero-badge">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+            </polygon>
+        </svg>
+        <span>AI-Powered Resume Optimization</span>
+    </div>
+
+    <h1 class="hero-title"
+        style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+        <!-- <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg> -->
+        <span>Land Your Dream Job</span>
+    </h1>
+    <p class="hero-subtitle">Paste a job description and let AI optimize your resume for maximum ATS compatibility.</p>
+
+    <div class="feature-pills">
+        <div class="feature-pill">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="6"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+            </svg>
+            <span>ATS Optimized</span>
+        </div>
+        <div class="feature-pill">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+            <span>Real-time Optimization</span>
+        </div>
+        <div class="feature-pill">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>PDF Export</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Job Input Form Card -->
+<div class="panel">
+    <div class="section-title">Paste Job Description</div>
+
+    <label for="homeTemplateSelect">Active LaTeX Resume Template</label>
+    <select id="homeTemplateSelect" style="margin-bottom: 14px;"></select>
+
+    <textarea id="jobDescription" placeholder="Paste the complete job description here..."
+        spellcheck="false"></textarea>
+
+    <div class="row" style="margin-top: 16px; gap: 12px;">
+        <button id="generateBtn" style="padding: 13px 26px; font-size: 15px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                </polygon>
+            </svg>
+            <span>Generate Resume</span>
+        </button>
+        <button id="clearBtn" class="secondary" style="padding: 13px 20px;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Clear</span>
+        </button>
+    </div>
+    <div id="status" class="status"></div>
+</div>
+
+<!-- Generated LaTeX Code Result Panel (Displayed between Job Input Card and Pro Tip Card) -->
+<div id="mainResultPanel" class="panel hidden" style="margin-top: 16px;">
+    <div class="row" style="justify-content: space-between; margin-bottom: 14px;">
+        <div
+            style="font-size: 16px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                </polygon>
+            </svg>
+            <span>Generated ATS-Optimized LaTeX Code</span>
+        </div>
+        <div class="row" style="gap: 10px;">
+            <button id="copyLatexBtn" class="secondary" style="padding: 8px 16px; font-size: 13px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Copy Code</span>
+            </button>
+            <a id="downloadPdfBtn" href="#" download class="btn"
+                style="padding: 8px 18px; font-size: 13px; display: inline-flex;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download PDF</span>
+            </a>
+        </div>
+    </div>
+    <div id="mainLatexCode" class="code" style="max-height: 380px; min-height: 200px;"></div>
+</div>
+
+<!-- How to Use / Tips Card -->
+<div class="pro-tip-card">
+    <div class="pro-tip-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+    </div>
+    <div style="flex: 1;">
+        <div style="font-weight: 700; font-size: 15.5px; margin-bottom: 6px; color: var(--text);">
+            💡 Tips: How to Use ResumeStudio
+        </div>
+        <div style="color: var(--muted); font-size: 13.5px; line-height: 1.6;">
+            <p style="margin: 0 0 8px 0;">Follow these simple steps to generate your ATS-optimized resume:</p>
+            <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+                <li><strong>Paste Job Description:</strong> Paste the full target job description into the input box above.</li>
+                <li><strong>Click Generate:</strong> Tap <em>"Optimize Resume & Generate PDF"</em> to let AI tailor your skills and experience.</li>
+                <li><strong>Preview & Download:</strong> View your live LaTeX resume preview and download your 1-page PDF. Resumes automatically save in <strong>Saved Resumes</strong>.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<!-- Animated Generation & Progress Modal -->
+<div id="optimizationModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width: 680px;">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                    </polygon>
+                </svg>
+                <span>ATS Resume Optimization</span>
+            </div>
+            <!-- Close button commented out as requested -->
+            <!-- <button class="close-modal" id="closeOptimizationModalBtn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button> -->
+        </div>
+
+        <p class="small" id="modalSubtitle" style="color: var(--muted); margin-top: 4px;">Processing your request and
+            generating ATS-aligned resume...</p>
+
+        <!-- Smooth Progress Track -->
+        <div class="progress-track">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+
+        <!-- Step List -->
+        <div style="display: grid; gap: 10px; margin: 10px 0;">
+            <div id="step1" class="step-item pending">
+                <div class="step-icon">1</div>
+                <span>Parsing Job Description & Keywords...</span>
+            </div>
+            <div id="step2" class="step-item pending">
+                <div class="step-icon">2</div>
+                <span>Querying AI & Customizing LaTeX Resume...</span>
+            </div>
+            <div id="step3" class="step-item pending">
+                <div class="step-icon">3</div>
+                <span>Compiling ATS PDF Document...</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const jobDescription = $('#jobDescription');
+    const generateBtn = $('#generateBtn');
+    const clearBtn = $('#clearBtn');
+    const homeTemplateSelect = $('#homeTemplateSelect');
+
+    // Result elements
+    const mainResultPanel = $('#mainResultPanel');
+    const mainLatexCode = $('#mainLatexCode');
+    const copyLatexBtn = $('#copyLatexBtn');
+    const downloadPdfBtn = $('#downloadPdfBtn');
+
+    // Modal elements
+    const optimizationModal = $('#optimizationModal');
+    const progressFill = $('#progressFill');
+    const step1 = $('#step1');
+    const step2 = $('#step2');
+    const step3 = $('#step3');
+
+    function updateGreeting() {
+        const hour = new Date().getHours();
+        let greeting = 'Good Evening';
+        if (hour >= 5 && hour < 12) greeting = 'Good Morning';
+        else if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+
+        const pill = $('#greetingText');
+        if (pill) pill.textContent = greeting;
+    }
+
+    function refreshHomeTemplates() {
+        const templates = getSavedTemplates();
+        const activeId = getActiveTemplateId();
+
+        homeTemplateSelect.innerHTML = '<option value="default">Default ATS Resume Template</option>';
+        templates.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = t.name;
+            if (t.id === activeId) opt.selected = true;
+            homeTemplateSelect.appendChild(opt);
+        });
+        if (activeId === 'default') homeTemplateSelect.value = 'default';
+    }
+
+    function getSelectedTemplateCode() {
+        const selectedId = homeTemplateSelect.value;
+        if (selectedId === 'default') return DEFAULT_LATEX;
+
+        const templates = getSavedTemplates();
+        const found = templates.find(t => t.id === selectedId);
+        return found ? found.code : DEFAULT_LATEX;
+    }
+
+    let currentPercent = 0;
+    let progressInterval = null;
+
+    function setStepState(stepEl, state) {
+        stepEl.className = 'step-item ' + state;
+    }
+
+    // Continuous smooth progress fill animation
+    function startSmoothProgress() {
+        if (progressInterval) clearInterval(progressInterval);
+        currentPercent = 0;
+        progressFill.style.width = '0%';
+        setStepState(step1, 'active');
+        setStepState(step2, 'pending');
+        setStepState(step3, 'pending');
+
+        progressInterval = setInterval(() => {
+            if (currentPercent < 94) {
+                const remaining = 95 - currentPercent;
+                const increment = Math.max(remaining * 0.025, 0.12);
+                currentPercent += increment;
+                if (currentPercent > 94) currentPercent = 94;
+                progressFill.style.width = currentPercent.toFixed(1) + '%';
+
+                if (currentPercent >= 22 && step1.classList.contains('active')) {
+                    setStepState(step1, 'completed');
+                    setStepState(step2, 'active');
+                }
+                if (currentPercent >= 62 && step2.classList.contains('active')) {
+                    setStepState(step2, 'completed');
+                    setStepState(step3, 'active');
+                }
+            }
+        }, 30);
+    }
+
+    function completeSmoothProgress(callback) {
+        if (progressInterval) clearInterval(progressInterval);
+
+        setStepState(step1, 'completed');
+        setStepState(step2, 'completed');
+        setStepState(step3, 'active');
+
+        const startTime = Date.now();
+        const startVal = currentPercent;
+        const duration = 400; // ms transition to 100%
+
+        const fillInterval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const ratio = Math.min(elapsed / duration, 1);
+            const val = startVal + (100 - startVal) * ratio;
+            progressFill.style.width = val.toFixed(1) + '%';
+
+            if (ratio >= 1) {
+                clearInterval(fillInterval);
+                setStepState(step3, 'completed');
+                if (callback) callback();
+            }
+        }, 20);
+    }
+
+    generateBtn.addEventListener('click', async () => {
+        const text = jobDescription.value.trim();
+        if (!text) {
+            showGlobalToast('⚠️ Job Description Required', 'Please paste a job description before generating.');
+            return;
+        }
+
+        const activeLatexCode = getSelectedTemplateCode();
+        startSmoothProgress();
+        optimizationModal.classList.remove('hidden');
+
+        try {
+            const res = await fetch('/optimize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    job_description: text,
+                    latex_template: activeLatexCode
+                })
+            });
+            const data = await res.json();
+
+            if (!res.ok || data.error) {
+                throw new Error(data.error || 'Unexpected error occurred');
+            }
+
+            completeSmoothProgress(() => {
+                optimizationModal.classList.add('hidden');
+
+                if (data.latex_code) {
+                    mainLatexCode.textContent = data.latex_code;
+                    mainResultPanel.classList.remove('hidden');
+                    const targetY = mainResultPanel.getBoundingClientRect().top + window.pageYOffset - 80;
+                    window.scrollTo({ top: targetY, left: 0, behavior: 'smooth' });
+
+                    // ALWAYS save generated resume to local storage saved resumes
+                    const now = new Date();
+                    const dateStr = now.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+                    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                    const snippet = text.length > 25 ? text.substring(0, 25).trim() + '...' : text;
+                    const resumeTitle = `ATS Resume (${dateStr} ${timeStr}) - ${snippet}`;
+
+                    const saved = getSavedResumes();
+                    saved.unshift({
+                        id: data.file_id || ('res_' + Date.now()),
+                        title: resumeTitle,
+                        latex_code: data.latex_code,
+                        download_url: (data.success && data.pdf_generated && data.download_url) ? data.download_url : null,
+                        createdAt: now.toISOString()
+                    });
+                    saveSavedResumes(saved);
+
+                    if (data.success && data.pdf_generated && data.download_url) {
+                        downloadPdfBtn.href = data.download_url;
+                        downloadPdfBtn.style.display = 'inline-flex';
+                        showGlobalToast('✨ ATS Resume Generated!', 'Your new customized LaTeX resume is ready in Saved Resumes.');
+                    } else {
+                        downloadPdfBtn.style.display = 'none';
+                        showGlobalToast('✨ Resume Code Saved!', 'LaTeX code generated & saved to Saved Resumes.');
+                    }
+                }
+            });
+        } catch (e) {
+            if (progressInterval) clearInterval(progressInterval);
+            showGlobalToast('❌ Generation Error', e.message);
+            optimizationModal.classList.add('hidden');
+        }
+    });
+
+    clearBtn.addEventListener('click', () => {
+        jobDescription.value = '';
+    });
+
+    copyLatexBtn.addEventListener('click', async () => {
+        const text = mainLatexCode.textContent || '';
+        if (!text) return;
+        try {
+            await navigator.clipboard.writeText(text);
+            copyLatexBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Copied!</span>';
+            setTimeout(() => {
+                copyLatexBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span>Copy Code</span>';
+            }, 2000);
+        } catch (e) { }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateGreeting();
+        refreshHomeTemplates();
+
+        if (homeTemplateSelect) {
+            homeTemplateSelect.addEventListener('change', () => {
+                if (homeTemplateSelect.value) {
+                    setActiveTemplateId(homeTemplateSelect.value);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

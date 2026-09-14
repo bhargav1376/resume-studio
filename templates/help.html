@@ -1,0 +1,604 @@
+{% extends "base.html" %}
+
+{% block title %}ResumeStudio — Help{% endblock %}
+
+{% block content %}
+<style>
+    .help-wrapper {
+        max-width: 920px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        padding-bottom: 20px;
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(22px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulseGlow {
+        0%, 100% {
+            box-shadow: 0 0 15px rgba(124, 156, 255, 0.2);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.45);
+        }
+    }
+
+    @keyframes floatSoft {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+    }
+
+    @keyframes heartBeat {
+        0%, 100% { transform: scale(1); }
+        15% { transform: scale(1.35); }
+        30% { transform: scale(1); }
+        45% { transform: scale(1.25); }
+    }
+
+    @keyframes shimmerBar {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    /* Hero Card */
+    .help-hero {
+        background: linear-gradient(135deg, rgba(124, 156, 255, 0.12), rgba(158, 119, 255, 0.08));
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 28px 26px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .help-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), #9e77ff, var(--primary-2));
+        background-size: 200% 100%;
+        animation: shimmerBar 4s linear infinite;
+    }
+
+    .help-hero-icon {
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, var(--primary), #9e77ff);
+        display: grid;
+        place-items: center;
+        color: white;
+        box-shadow: 0 10px 24px rgba(124, 156, 255, 0.35);
+        animation: floatSoft 3s ease-in-out infinite;
+    }
+
+    .help-hero-title {
+        font-size: clamp(24px, 3.5vw, 30px);
+        font-weight: 800;
+        color: var(--text);
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+    }
+
+    .help-hero-subtitle {
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 4px;
+    }
+
+    /* Help Sections with Staggered Entrance */
+    .help-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 24px 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        opacity: 0;
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .help-card:nth-child(2) { animation-delay: 0.1s; }
+    .help-card:nth-child(3) { animation-delay: 0.2s; }
+    .help-card:nth-child(4) { animation-delay: 0.3s; }
+    .help-card:nth-child(5) { animation-delay: 0.4s; }
+
+    .help-card:hover {
+        border-color: rgba(124, 156, 255, 0.35);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 14px;
+    }
+
+    .card-header-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(124, 156, 255, 0.12);
+        color: var(--primary);
+        display: grid;
+        place-items: center;
+    }
+
+    /* About App */
+    .about-text {
+        font-size: 14px;
+        line-height: 1.75;
+        color: var(--text);
+    }
+    .about-highlight {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    /* How It Works Grid */
+    .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 4px;
+    }
+
+    .step-box {
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .step-box:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary);
+        box-shadow: 0 12px 28px rgba(124, 156, 255, 0.18);
+    }
+
+    .step-badge {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), #9e77ff);
+        color: white;
+        font-weight: 800;
+        font-size: 15px;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 4px 12px rgba(124, 156, 255, 0.3);
+    }
+
+    .step-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .step-info {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.55;
+    }
+
+    /* Features Grid */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        margin-top: 4px;
+    }
+
+    .feature-card {
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary);
+        background: rgba(124, 156, 255, 0.04);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon-wrapper {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(124, 156, 255, 0.15), rgba(158, 119, 255, 0.15));
+        color: var(--primary);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+    }
+
+    .feature-title {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 3px;
+    }
+
+    .feature-desc {
+        font-size: 12.5px;
+        color: var(--muted);
+        line-height: 1.5;
+    }
+
+    /* Contact & Support Section */
+    .contact-container {
+        background: linear-gradient(135deg, rgba(124, 156, 255, 0.08), rgba(34, 197, 94, 0.06));
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+        opacity: 0;
+        transition: border-color 0.3s ease;
+    }
+
+    .contact-container:hover {
+        border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    .developer-profile {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
+    .dev-avatar-glow {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, var(--primary), #22c55e);
+        display: grid;
+        place-items: center;
+        color: white;
+        font-weight: 800;
+        font-size: 24px;
+        box-shadow: 0 8px 24px rgba(34, 197, 94, 0.35);
+        animation: pulseGlow 3s ease-in-out infinite;
+    }
+
+    .dev-name {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text);
+        letter-spacing: -0.3px;
+    }
+
+    .dev-role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid var(--success);
+        color: var(--success);
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .email-action-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+    }
+
+    .email-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        padding: 12px 18px;
+        border-radius: 14px;
+        color: var(--text);
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .email-link-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(124, 156, 255, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(124, 156, 255, 0.2);
+    }
+
+    .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 6px 18px rgba(124, 156, 255, 0.25);
+    }
+
+    .copy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(124, 156, 255, 0.35);
+    }
+
+    /* Footer Branding */
+    .help-page-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 24px 0 12px;
+        gap: 8px;
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+        opacity: 0;
+    }
+
+    .love-branding {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .heart-animated {
+        display: inline-block;
+        color: #ef4444;
+        font-size: 16px;
+        animation: heartBeat 1.8s ease-in-out infinite;
+    }
+
+    .app-version-badge {
+        font-size: 12px;
+        color: var(--muted);
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+</style>
+
+<div class="help-wrapper">
+    <!-- Hero Title Card -->
+    <div class="help-hero">
+        <div class="help-hero-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3.5 0 1.5-1.5 2-1.5 2"></path>
+                <circle cx="12" cy="17" r="0.75" fill="currentColor"></circle>
+            </svg>
+        </div>
+        <div>
+            <div class="help-hero-title">Help</div>
+            <div class="help-hero-subtitle">Comprehensive guide to ResumeStudio, feature workflow, and developer support.</div>
+        </div>
+    </div>
+
+    <!-- Section 1: About App -->
+    <div class="help-card">
+        <div class="card-header">
+            <div class="card-header-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            </div>
+            <span>About App</span>
+        </div>
+        <div class="about-text">
+            <strong>ResumeStudio</strong> is an advanced AI-powered resume engineering platform crafted to tailor LaTeX resumes precisely to target job descriptions. By analyzing role requirements, extracting critical ATS keywords, and re-engineering bullet points in real time, ResumeStudio helps job applicants land more interviews with perfectly formatted 1-page LaTeX resumes.
+        </div>
+    </div>
+
+    <!-- Section 2: How It Works -->
+    <div class="help-card">
+        <div class="card-header">
+            <div class="card-header-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
+            <span>How It Works</span>
+        </div>
+        <div class="steps-grid">
+            <div class="step-box">
+                <div class="step-badge">1</div>
+                <div class="step-name">Select Template</div>
+                <div class="step-info">Pick a active LaTeX template from default options or create custom templates in the Templates Studio.</div>
+            </div>
+            <div class="step-box">
+                <div class="step-badge">2</div>
+                <div class="step-name">Paste Job Posting</div>
+                <div class="step-info">Paste the complete target job description into the input panel on the Home page.</div>
+            </div>
+            <div class="step-box">
+                <div class="step-badge">3</div>
+                <div class="step-name">AI Optimization</div>
+                <div class="step-info">Click <em>Generate Resume</em> to let AI parse keywords and generate tailored LaTeX resume code.</div>
+            </div>
+            <div class="step-box">
+                <div class="step-badge">4</div>
+                <div class="step-name">Export PDF & Saved</div>
+                <div class="step-info">Download your compiled PDF document or copy LaTeX code directly. Generated resumes auto-save in Saved Resumes.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Features -->
+    <div class="help-card">
+        <div class="card-header">
+            <div class="card-header-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <span>Features</span>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">🎯</div>
+                <div>
+                    <div class="feature-title">ATS Keyword Optimization</div>
+                    <div class="feature-desc">Dynamically extracts skills and requirements from job postings to match screening systems.</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">📄</div>
+                <div>
+                    <div class="feature-title">LaTeX Template Manager</div>
+                    <div class="feature-desc">Full code editor supporting custom LaTeX templates, live editing, and default template selection.</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">⚡</div>
+                <div>
+                    <div class="feature-title">Live PDF Compilation</div>
+                    <div class="feature-desc">Fast automated compilation engine generating crisp 1-page PDF downloads in seconds.</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">💾</div>
+                <div>
+                    <div class="feature-title">Local Saved Resumes</div>
+                    <div class="feature-desc">Saves all generated resumes in LocalStorage for instant download and single-click access anytime.</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">🎨</div>
+                <div>
+                    <div class="feature-title">Animated Theme Transition</div>
+                    <div class="feature-desc">Smooth angled curtain animation when toggling between dark and light mode preferences.</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">🔔</div>
+                <div>
+                    <div class="feature-title">Background Job Toast</div>
+                    <div class="feature-desc">Global toast notifications alerting you instantly when background resume tasks complete.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Contact & Support -->
+    <div class="contact-container">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0;">
+            <div class="card-header-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </div>
+            <span>Contact & Support</span>
+        </div>
+
+        <div class="developer-profile">
+            <div class="dev-avatar-glow">B</div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div class="dev-name">bhargav</div>
+                    <span class="dev-role-badge">fully created and developed</span>
+                </div>
+                <div class="small" style="margin-top: 4px; color: var(--muted);">Creator & Lead Developer of ResumeStudio</div>
+            </div>
+        </div>
+
+        <p class="about-text" style="font-size: 13.5px; color: var(--muted); margin: 0;">
+            For technical support, custom template integration, feedback, or inquiries, reach out directly below:
+        </p>
+
+        <div class="email-action-row">
+            <a href="mailto:bhargavchintha123@gmail.com" class="email-link-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                <span>bhargavchintha123@gmail.com</span>
+            </a>
+            <button class="copy-btn" onclick="copySupportEmail()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span id="copyEmailText">Copy Email</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer Branding -->
+    <div class="help-page-footer">
+        <div class="love-branding">
+            <span>made with</span>
+            <span class="heart-animated">❤️</span>
+            <span>bhargav</span>
+        </div>
+        <div class="app-version-badge">version 1.0.0</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function copySupportEmail() {
+        const email = 'bhargavchintha123@gmail.com';
+        try {
+            await navigator.clipboard.writeText(email);
+            if (typeof showGlobalToast === 'function') {
+                showGlobalToast('📋 Email Copied!', 'bhargavchintha123@gmail.com copied to clipboard.');
+            }
+            const label = document.getElementById('copyEmailText');
+            if (label) {
+                label.textContent = 'Copied!';
+                setTimeout(() => { label.textContent = 'Copy Email'; }, 2000);
+            }
+        } catch (e) {
+            console.error('Copy failed', e);
+        }
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}ResumeStudio — Manage LaTeX Templates{% endblock %}
+
+{% block content %}
+<style>
+    /* Modal & Dropdown Menu Styles */
+    .modal-backdrop {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .modal-backdrop.hidden {
+        display: none !important;
+    }
+    .modal-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 760px;
+        padding: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+    }
+    .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .close-modal {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: none;
+        padding: 4px;
+        min-width: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .close-modal:hover { color: var(--text); }
+
+    .default-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(124, 156, 255, 0.2));
+        border: 1px solid var(--success);
+        color: var(--success);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+    }
+    .custom-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+    
+    .icon-btn {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 8px;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        box-shadow: none;
+        transition: all 0.2s ease;
+    }
+    .icon-btn:hover {
+        border-color: var(--primary);
+        background: rgba(124, 156, 255, 0.15);
+    }
+    .menu-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        top: 38px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 6px;
+        width: 210px;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+        z-index: 500;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .dropdown-menu.hidden {
+        display: none !important;
+    }
+    .dropdown-menu button {
+        width: 100%;
+        justify-content: flex-start;
+        background: transparent;
+        box-shadow: none;
+        border: none;
+        color: var(--text);
+        padding: 9px 12px;
+        font-size: 13.5px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .dropdown-menu button:hover {
+        background: rgba(124, 156, 255, 0.15);
+        color: var(--primary);
+    }
+    .dropdown-menu button.danger-text {
+        color: var(--error);
+    }
+    .dropdown-menu button.danger-text:hover {
+        background: rgba(239, 68, 68, 0.15);
+    }
+
+    .template-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+    }
+    .template-card {
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 14px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .template-card.active-card {
+        border-color: var(--success);
+        box-shadow: 0 0 18px rgba(34, 197, 94, 0.15);
+    }
+</style>
+
+<div class="panel">
+    <div class="row" style="justify-content: space-between; margin-bottom: 12px;">
+        <div>
+            <div class="section-title" style="margin-bottom:4px;">LaTeX Resume Templates Library</div>
+            <p class="small">Create, edit, and set default ATS templates to use for resume generation.</p>
+        </div>
+        <button id="openCreateModalBtn" class="btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Create New Template</span>
+        </button>
+    </div>
+
+    <!-- Grid of Saved Templates -->
+    <div id="savedTemplatesList" class="template-card-grid"></div>
+</div>
+
+<!-- Modal Popup for Create / Edit Template -->
+<div id="templateModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">Create New Template</div>
+            <button class="close-modal" id="closeModalBtn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <label for="modalTemplateName">Template Name</label>
+        <input type="text" id="modalTemplateName" placeholder="e.g. Software Engineer Template" />
+        
+        <label for="modalTemplateCode">LaTeX Source Code (MY RESUME LATEX CODE:)</label>
+        <textarea id="modalTemplateCode" style="min-height: 320px; font-family: monospace;" spellcheck="false"></textarea>
+        
+        <div id="modalStatus" class="status"></div>
+
+        <div class="row" style="justify-content: flex-end; gap: 10px; margin-top: 6px;">
+            <button id="cancelModalBtn" class="secondary">Cancel</button>
+            <button id="saveModalBtn">Save Template</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let modalEditingId = 'new';
+
+    function generateUniqueTemplateName(prefix = 'Custom Template') {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const templates = getSavedTemplates();
+        const num = templates.length + 1;
+        return `${prefix} ${num} (${dateStr} ${timeStr})`;
+    }
+
+    function setModalStatus(msg, type = 'muted') {
+        const el = $('#modalStatus');
+        if (el) {
+            el.className = 'status ' + (type === 'ok' ? 'ok' : type === 'err' ? 'err' : '');
+            el.textContent = msg;
+        }
+    }
+
+    function toggleMenu(event, menuId) {
+        event.stopPropagation();
+        $$('.dropdown-menu').forEach(m => {
+            if (m.id !== menuId) m.classList.add('hidden');
+        });
+        const target = $('#' + menuId);
+        if (target) target.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', () => {
+        $$('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+    });
+
+    function refreshTemplatesUI() {
+        const templates = getSavedTemplates();
+        const activeId = getActiveTemplateId();
+        const templatesList = $('#savedTemplatesList');
+        if (!templatesList) return;
+
+        templatesList.innerHTML = '';
+
+        // Built-in Default Template Card
+        const isDefaultActive = activeId === 'default';
+        const defaultCard = document.createElement('div');
+        defaultCard.className = `template-card ${isDefaultActive ? 'active-card' : ''}`;
+        defaultCard.innerHTML = `
+            <div>
+                <div class="row" style="justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    ${isDefaultActive ? '<span class="default-badge">DEFAULT RESUME</span>' : '<span class="custom-badge">BUILT-IN TEMPLATE</span>'}
+                    <div class="menu-container">
+                        <button class="icon-btn" onclick="toggleMenu(event, 'menu-default')">⋮</button>
+                        <div id="menu-default" class="dropdown-menu hidden">
+                            <button onclick="openEditModal('default')">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <span>Edit / View</span>
+                            </button>
+                            ${!isDefaultActive ? `
+                            <button onclick="setAsDefaultTemplate('default')">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <span>Make Default Resume</span>
+                            </button>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-title" style="margin-bottom: 4px;">Default ATS Resume Template</div>
+                <div class="card-sub">Built-in clean ATS-optimized LaTeX layout</div>
+            </div>
+            <div class="row" style="margin-top: 12px;">
+                <button class="secondary" style="width: 100%;" onclick="openEditModal('default')">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <span>Edit / View</span>
+                </button>
+            </div>
+        `;
+        templatesList.appendChild(defaultCard);
+
+        // Custom Templates Cards
+        templates.forEach(t => {
+            const isActive = t.id === activeId;
+            const card = document.createElement('div');
+            card.className = `template-card ${isActive ? 'active-card' : ''}`;
+            card.innerHTML = `
+                <div>
+                    <div class="row" style="justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        ${isActive ? '<span class="default-badge">DEFAULT RESUME</span>' : '<span class="custom-badge">CUSTOM TEMPLATE</span>'}
+                        <div class="menu-container">
+                            <button class="icon-btn" onclick="toggleMenu(event, 'menu-${t.id}')">⋮</button>
+                            <div id="menu-${t.id}" class="dropdown-menu hidden">
+                                <button onclick="openEditModal('${t.id}')">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    <span>Edit Template</span>
+                                </button>
+                                ${!isActive ? `
+                                <button onclick="setAsDefaultTemplate('${t.id}')">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                    <span>Make Default Resume</span>
+                                </button>` : ''}
+                                <button class="danger-text" onclick="confirmDeleteTemplate('${t.id}')">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    <span>Delete Template</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-title" style="margin-bottom: 4px;">${t.name}</div>
+                    <div class="card-sub">Modified: ${new Date(t.updatedAt).toLocaleDateString()}</div>
+                </div>
+                <div class="row" style="margin-top: 12px; gap: 8px;">
+                    <button class="secondary" style="flex:1;" onclick="openEditModal('${t.id}')">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span>Edit</span>
+                    </button>
+                    ${!isActive ? `<button class="secondary" onclick="setAsDefaultTemplate('${t.id}')">Set Active</button>` : ''}
+                </div>
+            `;
+            templatesList.appendChild(card);
+        });
+    }
+
+    // Modal Control Functions
+    window.openCreateModal = function() {
+        modalEditingId = 'new';
+        $('#modalTitle').textContent = 'Create New LaTeX Template';
+        $('#modalTemplateName').value = generateUniqueTemplateName('Custom Template');
+        $('#modalTemplateCode').value = DEFAULT_LATEX;
+        setModalStatus('');
+        $('#templateModal').classList.remove('hidden');
+    };
+
+    window.openEditModal = function(id) {
+        modalEditingId = id;
+        if (id === 'default') {
+            $('#modalTitle').textContent = 'Edit Default ATS Template';
+            $('#modalTemplateName').value = 'Default ATS Resume Template';
+            $('#modalTemplateCode').value = DEFAULT_LATEX;
+        } else {
+            const templates = getSavedTemplates();
+            const target = templates.find(t => t.id === id);
+            if (target) {
+                $('#modalTitle').textContent = 'Edit Template: ' + target.name;
+                $('#modalTemplateName').value = target.name;
+                $('#modalTemplateCode').value = target.code;
+            }
+        }
+        setModalStatus('');
+        $('#templateModal').classList.remove('hidden');
+    };
+
+    window.closeModal = function() {
+        $('#templateModal').classList.add('hidden');
+    };
+
+    window.setAsDefaultTemplate = function(id) {
+        setActiveTemplateId(id);
+        refreshTemplatesUI();
+        showGlobalToast('✨ Default Template Set', 'Active resume template updated successfully.');
+    };
+
+    window.confirmDeleteTemplate = function(id) {
+        let templates = getSavedTemplates();
+        templates = templates.filter(t => t.id !== id);
+        saveTemplates(templates);
+
+        if (getActiveTemplateId() === id) {
+            setActiveTemplateId('default');
+        }
+
+        refreshTemplatesUI();
+        showGlobalToast('🗑️ Template Deleted', 'Template removed from library.');
+    };
+
+    // Event Listeners
+    $('#openCreateModalBtn').addEventListener('click', () => {
+        openCreateModal();
+    });
+
+    $('#closeModalBtn').addEventListener('click', closeModal);
+    $('#cancelModalBtn').addEventListener('click', closeModal);
+
+    $('#saveModalBtn').addEventListener('click', () => {
+        let name = $('#modalTemplateName').value.trim();
+        if (!name || name === 'New Custom Template' || name === 'Untitled Custom Template') {
+            name = generateUniqueTemplateName('Custom Template');
+        }
+        const code = $('#modalTemplateCode').value.trim();
+
+        if (!code) {
+            setModalStatus('Template code cannot be empty.', 'err');
+            return;
+        }
+
+        let templates = getSavedTemplates();
+
+        if (modalEditingId === 'new' || modalEditingId === 'default') {
+            // Save as a new custom template
+            const newId = 'tpl_' + Date.now();
+            templates.push({
+                id: newId,
+                name: name,
+                code: code,
+                updatedAt: new Date().toISOString()
+            });
+            setActiveTemplateId(newId);
+        } else {
+            // Update existing custom template
+            const idx = templates.findIndex(t => t.id === modalEditingId);
+            if (idx !== -1) {
+                templates[idx].name = name;
+                templates[idx].code = code;
+                templates[idx].updatedAt = new Date().toISOString();
+            } else {
+                const newId = 'tpl_' + Date.now();
+                templates.push({ id: newId, name, code, updatedAt: new Date().toISOString() });
+            }
+        }
+
+        saveTemplates(templates);
+        refreshTemplatesUI();
+        closeModal();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        refreshTemplatesUI();
+    });
+</script>
+{% endblock %}
